@@ -116,7 +116,7 @@ local function watchGui(parent)
     end)
 end
 
--- حلقة الفحص بالخلفية كما هي بدون لمس
+-- حلقة الفحص بالخلفية
 task.spawn(function()
     while task.wait(0.3) do
         watchGui(CoreGui)
@@ -133,7 +133,7 @@ ApplyButton.MouseButton1Click:Connect(function()
     startTime = os.clock()
     isActivated = true 
 
-    -- هنا تم وضع إنفينيتي ييلد الصافي فقط وحذف الباقي
+    -- تشغيل إنفينيتي ييلد الصافي لحاله وبس
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source'))()
