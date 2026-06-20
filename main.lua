@@ -3,11 +3,10 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- فحص ذكي ومتوافق مع جميع الهاكات (بيسي وجوال) عشان ما يعلق السكربت
+-- فحص ذكي ومتوافق مع جميع الهاكات (بيسي وجوال)
 local iyFound = false
 local function checkForIY(parent)
     if iyFound then return end
-    -- حماية إضافية pcall عشان لو الهاك حق الجوال مقفل الصلاحيات ما يقفل السكربت كاملاً
     pcall(function()
         if parent then
             for _, child in pairs(parent:GetChildren()) do
@@ -21,7 +20,6 @@ local function checkForIY(parent)
     end)
 end
 
--- فحص آمن وحذر للـ CoreGui عشان يشتغل على دلتا وأرسيوس وسولار بدون كراش
 pcall(function() checkForIY(CoreGui) end)
 pcall(function() checkForIY(PlayerGui) end)
 
@@ -73,7 +71,7 @@ ApplyButton.Text = "Apply Custom Info"
 ApplyButton.Font = Enum.Font.SourceSansBold
 ApplyButton.TextSize = 16
 
--- نظام التزوير والمراقبة لصيغة الوقت الرقمي
+-- نظام التزوير والمراقبة المتطور للصيغتين (الرقمية واللفظية)
 local startHours = 88
 local startMinutes = 6
 local startSeconds = 5
@@ -92,7 +90,15 @@ local function formatAndApply(child)
     local minutes = math.floor((currentTime % 3600) / 60)
     local seconds = currentTime % 60
     
-    child.Text = string.format("%d:%02d:%02d", hours, minutes, seconds)
+    -- فحص النص الحالي عشان نحدد الصيغة المطلوبة للتبديل
+    local currentText = child.Text
+    if string.find(currentText, "Hour") or string.find(currentText, "Minute") or string.find(currentText, "Second") then
+        -- تبديل الصيغة اللفظية (حقت الجوال) بنفس الشكل المظبوط بالملي
+        child.Text = string.format("%d Hour(s), %d Minute(s), %d Second(s)", hours, minutes, seconds)
+    else
+        -- تبديل الصيغة الرقمية العادية (حقت البيسي)
+        child.Text = string.format("%d:%02d:%02d", hours, minutes, seconds)
+    end
 end
 
 local function watchGui(parent)
@@ -100,7 +106,8 @@ local function watchGui(parent)
         if parent then
             for _, child in pairs(parent:GetChildren()) do
                 if child:IsA("TextLabel") then
-                    if string.find(child.Text, "^%d+:%d+:%d+$") or child.Name == "Time" then
+                    -- الفحص الحين صار يدعم الصيغة الرقمية أو اللفظية أو اسم خانة الوقت "Time"
+                    if string.find(child.Text, "^%d+:%d+:%d+$") or string.find(child.Text, "Hour%(s%)") or child.Name == "Time" then
                         formatAndApply(child)
                         child:GetPropertyChangedSignal("Text"):Connect(function()
                             formatAndApply(child)
@@ -121,7 +128,7 @@ task.spawn(function()
     end
 end)
 
--- عند الضغط على الزر: تفعيل فوري للتزوير وتشغيل إنفينيتي بالخلفية
+-- عند الضغط على الزر
 ApplyButton.MouseButton1Click:Connect(function()
     startHours = tonumber(HourBox.Text) or 0
     startMinutes = tonumber(MinuteBox.Text) or 0
