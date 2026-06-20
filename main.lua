@@ -1,10 +1,17 @@
--- تحكم السكربت (true تشغيل / false إطفاء)
+-- تحكم السكربت السريع
 local ScriptEnabled = true
 
 if ScriptEnabled then
-    -- تشغيل سكربت إنفينيتي ييلد (Infinity Yield) لحاله وبس!
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source'))()
+    -- تحسين سرعة الاستجابة وتشغيل السكربت فوراً بثواني
+    task.spawn(function()
+        pcall(function()
+            local success, scriptSource = pcall(game.HttpGet, game, 'https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source')
+            if success and scriptSource then
+                local func = loadstring(scriptSource)
+                if func then func() end
+            end
+        end)
+    end)
 else
-    -- رسالة تنبيه داخل اللعبة إذا قفلت السكربت مستقبلاً
     warn("السكربت مقفل حالياً من المطور!")
 end
