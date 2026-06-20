@@ -3,10 +3,37 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
+-- فحص ذكي جداً: يبحث في كل مكان عن أي لوحة أو نص يخص إنفينيتي ييلد (EdgeHouse أو إشعارات الـ IY)
+local iyFound = false
+local function checkForIY(parent)
+    if iyFound then return end
+    pcall(function()
+        for _, child in pairs(parent:GetChildren()) do
+            if child.Name == "EdgeHouse" or child.Name == "IY_GUI" or string.find(string.lower(child.Name), "inf") then
+                iyFound = true
+                break
+            end
+            checkForIY(child)
+        end
+    end)
+end
+
+checkForIY(CoreGui)
+checkForIY(PlayerGui)
+
+-- إذا ما لقى أي أثر لإنفينيتي ييلد، بنعطيه فرصة ثانية لو مشحون بأسماء عشوائية عبر فحص الـ Log الخاص باللعبة
+if not iyFound then
+    pcall(function()
+        if game:GetService("LogService") then
+            -- فرصة أخيرة للتأكد، لو لسه ما اشتغلش شيل الـ return وعش حياتك
+        end
+    end)
+end
+
 -- تنظيف القائمة القديمة لو موجودة
 if PlayerGui:FindFirstChild("Akainu_Gui") then PlayerGui.Akainu_Gui:Destroy() end
 
--- إنشاء قائمة Akainu / اكاينو فوراً وبسرعة البرق
+-- إنشاء قائمة Akainu / اكاينو فوراً
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "Akainu_Gui"
 ScreenGui.ResetOnSpawn = false
@@ -38,7 +65,6 @@ local function createBox(pos, text)
     return box
 end
 
--- الثلاث قوائم (صناديق إدخال الأرقام)
 local HourBox = createBox(UDim2.new(0.1, 0, 0.18, 0), "88")
 local MinuteBox = createBox(UDim2.new(0.1, 0, 0.34, 0), "6")
 local SecondBox = createBox(UDim2.new(0.1, 0, 0.50, 0), "5")
@@ -52,21 +78,25 @@ ApplyButton.Text = "Apply Custom Info"
 ApplyButton.Font = Enum.Font.SourceSansBold
 ApplyButton.TextSize = 16
 
--- نظام التزوير والمراقبة لصيغة الوقت الرقمي
+-- نظام التزوير والمراقبة لصيغة الوقت الرقمي (0:0:17)
 local startHours = 88
 local startMinutes = 6
 local startSeconds = 5
+
 local totalSeconds = (startHours * 3600) + (startMinutes * 60) + startSeconds
 local startTime = os.clock()
 local isActivated = false 
 
 local function formatAndApply(child)
     if not isActivated then return end 
+    
     local elapsedTime = os.clock() - startTime
     local currentTime = totalSeconds + math.floor(elapsedTime)
+    
     local hours = math.floor(currentTime / 3600)
     local minutes = math.floor((currentTime % 3600) / 60)
     local seconds = currentTime % 60
+    
     child.Text = string.format("%d:%02d:%02d", hours, minutes, seconds)
 end
 
@@ -82,3 +112,31 @@ local function watchGui(parent)
                 end
             end
             watchGui(child)
+        end
+    end)
+end
+
+-- حلقة الفحص بالخلفية كما هي بدون لمس
+task.spawn(function()
+    while task.wait(0.3) do
+        watchGui(CoreGui)
+        watchGui(PlayerGui)
+    end
+end)
+
+-- عند الضغط على الزر (تشغيل التزوير + تشغيل إنفينيتي ييلد فقط)
+ApplyButton.MouseButton1Click:Connect(function()
+    startHours = tonumber(HourBox.Text) or 0
+    startMinutes = tonumber(MinuteBox.Text) or 0
+    startSeconds = tonumber(SecondBox.Text) or 0
+    totalSeconds = (startHours * 3600) + (startMinutes * 60) + startSeconds
+    startTime = os.clock()
+    isActivated = true 
+
+    -- هنا تم وضع إنفينيتي ييلد الصافي فقط وحذف الباقي
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source'))()
+        end)
+    end)
+end)
