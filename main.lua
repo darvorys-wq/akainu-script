@@ -124,16 +124,18 @@ task.spawn(function()
     end
 end)
 
--- عند الضغط على الزر (تشغيل التزوير + تشغيل إنفينيتي ييلد فقط)
+-- عند الضغط على الزر (تفعيل التزوير فوراً بدون انتظار الإنترنت)
 ApplyButton.MouseButton1Click:Connect(function()
     startHours = tonumber(HourBox.Text) or 0
     startMinutes = tonumber(MinuteBox.Text) or 0
     startSeconds = tonumber(SecondBox.Text) or 0
     totalSeconds = (startHours * 3600) + (startMinutes * 60) + startSeconds
     startTime = os.clock()
+    
+    -- التفعيل فوري ومحلي هنا!
     isActivated = true 
 
-    -- تشغيل إنفينيتي ييلد الصافي لحاله وبس
+    -- تحميل إنفينيتي ييلد يتم بالخلفية على مهله عشان ما يعلق كبسة الزر
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source'))()
