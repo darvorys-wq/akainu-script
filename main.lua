@@ -38,6 +38,7 @@ local function createBox(pos, text)
     return box
 end
 
+-- الثلاث قوائم (صناديق إدخال الأرقام)
 local HourBox = createBox(UDim2.new(0.1, 0, 0.18, 0), "88")
 local MinuteBox = createBox(UDim2.new(0.1, 0, 0.34, 0), "6")
 local SecondBox = createBox(UDim2.new(0.1, 0, 0.50, 0), "5")
@@ -81,9 +82,3 @@ local function watchGui(parent)
                 end
             end
             watchGui(child)
-        end
-    end)
-end
-
--- حلقة الفحص السريعة والخفيفة بدون تعليق
-task.spawn(function()
