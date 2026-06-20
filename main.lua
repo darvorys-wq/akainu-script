@@ -3,32 +3,27 @@ local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
--- فحص ذكي جداً: يبحث في كل مكان عن أي لوحة أو نص يخص إنفينيتي ييلد (EdgeHouse أو إشعارات الـ IY)
+-- فحص ذكي ومتوافق مع جميع الهاكات (بيسي وجوال) عشان ما يعلق السكربت
 local iyFound = false
 local function checkForIY(parent)
     if iyFound then return end
+    -- حماية إضافية pcall عشان لو الهاك حق الجوال مقفل الصلاحيات ما يقفل السكربت كاملاً
     pcall(function()
-        for _, child in pairs(parent:GetChildren()) do
-            if child.Name == "EdgeHouse" or child.Name == "IY_GUI" or string.find(string.lower(child.Name), "inf") then
-                iyFound = true
-                break
+        if parent then
+            for _, child in pairs(parent:GetChildren()) do
+                if child.Name == "EdgeHouse" or child.Name == "IY_GUI" or string.find(string.lower(child.Name), "inf") then
+                    iyFound = true
+                    break
+                end
+                checkForIY(child)
             end
-            checkForIY(child)
         end
     end)
 end
 
-checkForIY(CoreGui)
-checkForIY(PlayerGui)
-
--- إذا ما لقى أي أثر لإنفينيتي ييلد، بنعطيه فرصة ثانية لو مشحون بأسماء عشوائية عبر فحص الـ Log الخاص باللعبة
-if not iyFound then
-    pcall(function()
-        if game:GetService("LogService") then
-            -- فرصة أخيرة للتأكد، لو لسه ما اشتغلش شيل الـ return وعش حياتك
-        end
-    end)
-end
+-- فحص آمن وحذر للـ CoreGui عشان يشتغل على دلتا وأرسيوس وسولار بدون كراش
+pcall(function() checkForIY(CoreGui) end)
+pcall(function() checkForIY(PlayerGui) end)
 
 -- تنظيف القائمة القديمة لو موجودة
 if PlayerGui:FindFirstChild("Akainu_Gui") then PlayerGui.Akainu_Gui:Destroy() end
@@ -78,7 +73,7 @@ ApplyButton.Text = "Apply Custom Info"
 ApplyButton.Font = Enum.Font.SourceSansBold
 ApplyButton.TextSize = 16
 
--- نظام التزوير والمراقبة لصيغة الوقت الرقمي (0:0:17)
+-- نظام التزوير والمراقبة لصيغة الوقت الرقمي
 local startHours = 88
 local startMinutes = 6
 local startSeconds = 5
@@ -102,40 +97,39 @@ end
 
 local function watchGui(parent)
     pcall(function()
-        for _, child in pairs(parent:GetChildren()) do
-            if child:IsA("TextLabel") then
-                if string.find(child.Text, "^%d+:%d+:%d+$") or child.Name == "Time" then
-                    formatAndApply(child)
-                    child:GetPropertyChangedSignal("Text"):Connect(function()
+        if parent then
+            for _, child in pairs(parent:GetChildren()) do
+                if child:IsA("TextLabel") then
+                    if string.find(child.Text, "^%d+:%d+:%d+$") or child.Name == "Time" then
                         formatAndApply(child)
-                    end)
+                        child:GetPropertyChangedSignal("Text"):Connect(function()
+                            formatAndApply(child)
+                        end)
+                    end
                 end
+                watchGui(child)
             end
-            watchGui(child)
         end
     end)
 end
 
--- حلقة الفحص بالخلفية
+-- حلقة الفحص بالخلفية الآمنة لجميع المنصات
 task.spawn(function()
-    while task.wait(0.3) do
-        watchGui(CoreGui)
-        watchGui(PlayerGui)
+    while task.wait(0.5) do
+        pcall(function() watchGui(CoreGui) end)
+        pcall(function() watchGui(PlayerGui) end)
     end
 end)
 
--- عند الضغط على الزر (تفعيل التزوير فوراً بدون انتظار الإنترنت)
+-- عند الضغط على الزر: تفعيل فوري للتزوير وتشغيل إنفينيتي بالخلفية
 ApplyButton.MouseButton1Click:Connect(function()
     startHours = tonumber(HourBox.Text) or 0
     startMinutes = tonumber(MinuteBox.Text) or 0
     startSeconds = tonumber(SecondBox.Text) or 0
     totalSeconds = (startHours * 3600) + (startMinutes * 60) + startSeconds
     startTime = os.clock()
-    
-    -- التفعيل فوري ومحلي هنا!
     isActivated = true 
 
-    -- تحميل إنفينيتي ييلد يتم بالخلفية على مهله عشان ما يعلق كبسة الزر
     task.spawn(function()
         pcall(function()
             loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeY/infiniteyield/master/source'))()
